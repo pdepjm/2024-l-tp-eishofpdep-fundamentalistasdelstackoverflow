@@ -9,7 +9,7 @@ jugador(elsa).
 desarrollo(ana,herreria).
 desarrollo(ana,forja).
 desarrollo(ana,emplumado).
-desarrollo(ana,lamina).
+desarrollo(ana,laminas).
 
 desarrollo(beto,herreria).
 desarrollo(beto,forja).
@@ -186,13 +186,35 @@ sobreviveAsedio(Jugador) :-
 dependencia(herreria).
 dependencia(emplumado, herreria).
 dependencia(punzon, emplumado).
-dependencia(collera, collera).
+
+dependencia(molino).
+dependencia(collera, molino).
 dependencia(arado, collera).
 
-dependecia(laminas, herreria).
-dependecia(malla, laminas).
-dependecia(placas, malla).
+dependencia(laminas, herreria).
+dependencia(malla, laminas).
+dependencia(placas, malla).
 
 dependencia(forja, herreria).
 dependencia(fundicion, forja).
 dependencia(horno, fundicion).
+
+tecnologia(Tecnologia) :-
+    dependencia(Tecnologia).
+tecnologia(Tecnologia) :-
+    dependencia(Tecnologia, _).
+
+revisarDependencias(_, Tecnologia) :-
+    dependencia(Tecnologia).
+
+revisarDependencias(Jugador, Tecnologia) :-
+    dependencia(Tecnologia, Dependencia),
+    desarrollo(Jugador, Dependencia),
+    revisarDependencias(Jugador, Dependencia).
+
+puedeDesarrollar(Jugador, Tecnologia) :-
+    jugador(Jugador,_),
+    tecnologia(Tecnologia),
+    not(desarrollo(Jugador, Tecnologia)),
+    revisarDependencias(Jugador, Tecnologia).
+% Punto 10 %
