@@ -22,15 +22,15 @@ desarrollo(dimitri,fundicion).
 % Punto 1 %
 
 % Punto 2 %
-expertoEnMetales(Jugador):-
-    desarrollo(Jugador,herreria),
-    desarrollo(Jugador,forja),
+romanoOMetalero(Jugador) :- 
     desarrollo(Jugador,fundicion).
+romanoOMetalero(Jugador) :- 
+    jugador(Jugador, romanos).
 
 expertoEnMetales(Jugador):-
     desarrollo(Jugador,herreria),
     desarrollo(Jugador,forja),
-    jugador(Jugador,romanos).
+    romanoOMetalero(Jugador).
 % Punto 2 %
 
 % Punto 3 %
@@ -57,98 +57,100 @@ alcanzo(Civilizacion,Tecnologia):-
 % Punto 5 %
 
 % Punto 6 %
-campeon(campeon1).
-campeon(campeon2).
-aCaballo(jinete1).
-aCamello(jinete2).
-piquero(piquero1, nivel(1)).
-piquero(piquero2, nivel(2)).
-piquero(piquero3, nivel(1)).
-piquero(piquero4, nivel(3)).
-piquero(piquero5, nivel(2)).
-tieneEscudo(piquero1).
-tieneEscudo(piquero3).
-tieneEscudo(piquero5).
+unidades(ana, jinete(jinete1, caballo)).
+unidades(ana, piquero(piquero1, nivel(1), escudo)).
+unidades(ana, piquero(piquero2, nivel(2), noEscudo)).
+unidades(beto, campeon(campeon1, vida(100))).
+unidades(beto, campeon(campeon2, vida(80))).
+unidades(beto, piquero(piquero3, nivel(1), escudo)).
+unidades(beto, jinete(jinete2, camello)).
+unidades(carola, piquero(piquero4, nivel(3), noEscudo)).
+unidades(carola, piquero(piquero5, nivel(2), escudo)).
+unidades(dimitri).
 
-jinete(Unidad) :-
-    aCaballo(Unidad).
-jinete(Unidad) :-
-    aCamello(Unidad).
+jinete(Jinete, Animal) :-
+    unidades(_, jinete(Jinete, Animal)).
+piquero(Piquero, nivel(Nivel), Escudo) :-
+    unidades(_, piquero(Piquero, nivel(Nivel), Escudo)).
+campeon(Campeon, Vida) :-
+    unidades(_, campeon(Campeon, vida(Vida))).
 
-unidades(ana, [jinete1, piquero1, piquero2]).
-unidades(beto, [campeon1, campeon2, piquero3, jinete2]).
-unidades(carola, [piquero4, piquero5]).
-unidades(dimitri, []).
 % Punto 6 %
 
 % Punto 7 %
-vida(campeon1, 100).
-vida(campeon2, 80).
+vida(Campeon, Vida) :-
+    campeon(Campeon, Vida).
 
 vida(Jinete, 90) :-
-    aCaballo(Jinete).
+    jinete(Jinete, caballo).
 
 vida(Jinete, 80) :-
-    aCamello(Jinete).
+    jinete(Jinete, camello).
 
 vidaPiquero(Piquero, 50) :-
-    piquero(Piquero, nivel(1)).
+    piquero(Piquero, nivel(1), _).
 
 vidaPiquero(Piquero, 65) :-
-    piquero(Piquero, nivel(2)).
+    piquero(Piquero, nivel(2), _).
 
 vidaPiquero(Piquero, 70) :-
-    piquero(Piquero, nivel(3)).
+    piquero(Piquero, nivel(3), _).
 
 vida(Piquero, Vida) :-
-    tieneEscudo(Piquero),
+    piquero(Piquero, _, escudo),
     vidaPiquero(Piquero, VidaAux),
     Vida is VidaAux * 1.1.
 
-vida(Piquero, VidaAux) :-
-    not(tieneEscudo(Piquero)),
-    vidaPiquero(Piquero, VidaAux).
+vida(Piquero, Vida) :-
+    piquero(Piquero, _, noEscudo),
+    vidaPiquero(Piquero, Vida).
 
 tieneMasVidaQue(Unidad1, Unidad2) :-
     vida(Unidad1, Vida1),
     vida(Unidad2, Vida2),
     Vida1 >= Vida2.
 
-unidadConMasVida(Jugador, Unidad) :-
-    unidades(Jugador,Cola),
-    member(Unidad, Cola),
-    forall(member(Miembro, Cola), tieneMasVidaQue(Unidad, Miembro)).
+esUnidadDe(Jugador, Unidad) :-
+    unidades(Jugador, piquero(Unidad, _, _)).
+esUnidadDe(Jugador, Unidad) :-
+    unidades(Jugador, campeon(Unidad, _)).
+esUnidadDe(Jugador, Unidad) :-
+    unidades(Jugador, jinete(Unidad, _)).
+
+unidadConMasVida(Jugador, UnidadMejor) :-
+    esUnidadDe(Jugador, UnidadMejor),
+    forall(esUnidadDe(Jugador, Unidad), tieneMasVidaQue(UnidadMejor, Unidad)).
 % Punto 7 %
 
 % Punto 8 %
 leGana(Campeon, Piquero) :-
-    campeon(Campeon),
-    piquero(Piquero,_).
+    campeon(Campeon, _),
+    piquero(Piquero, _, _).
 
 leGana(Jinete, Campeon) :-
-    jinete(Jinete),
-    campeon(Campeon).
+    jinete(Jinete, _),
+    campeon(Campeon, _).
 
 leGana(Piquero, Jinete) :-
-    piquero(Piquero, _),
-    jinete(Jinete).
+    piquero(Piquero, _, _),
+    jinete(Jinete, _).
 
 leGana(JineteA, JineteB) :-
-    aCamello(JineteA),
-    aCaballo(JineteB).
+    jinete(JineteA, camello),
+    jinete(JineteB, caballo).
 
 noHayVentaja(Unidad1, Unidad2) :-
-    campeon(Unidad1),
-    campeon(Unidad2).
+    campeon(Unidad1, _),
+    campeon(Unidad2, _).
 noHayVentaja(Unidad1, Unidad2) :-
-    piquero(Unidad1, _),
-    piquero(Unidad2, _).
+    piquero(Unidad1, _, _),
+    piquero(Unidad2, _, _).
+noHayVentaja(Unidad1, Unidad1) :-
+    jinete(Unidad1, camello),
+    jinete(Unidad2, camello).
 noHayVentaja(Unidad1, Unidad2) :-
-    aCaballo(Unidad1),
-    aCaballo(Unidad2).
-noHayVentaja(Unidad1, Unidad2) :-
-    aCamello(Unidad1),
-    aCamello(Unidad2).
+    jinete(Unidad1, caballo),
+    jinete(Unidad2, caballo).
 
 leGana(Unidad1, Unidad2) :-
     noHayVentaja(Unidad1, Unidad2),
@@ -158,27 +160,15 @@ leGana(Unidad1, Unidad2) :-
 % Punto 8 %
 
 % Punto 9 %
-cantidadPiqueros([Cabeza | Cola], ConEscudo, SinEscudo) :-
-    piquero(Cabeza,_),
-    tieneEscudo(Cabeza),
-    cantidadPiqueros(Cola, ConEscudoAux , SinEscudo),
-    ConEscudo is ConEscudoAux + 1.
-
-cantidadPiqueros([Cabeza | Cola], ConEscudo, SinEscudo) :-
-    piquero(Cabeza,_),
-    not(tieneEscudo(Cabeza)),
-    cantidadPiqueros(Cola, ConEscudo, SinEscudoAux),
-    SinEscudo is SinEscudoAux + 1.
-
-cantidadPiqueros([Cabeza | Cola], ConEscudo, SinEscudo) :-
-    not(piquero(Cabeza,_)),
-    cantidadPiqueros(Cola, ConEscudo, SinEscudo).
-
-cantidadPiqueros([], 0, 0).
+cantidadPiqueros(Jugador, Cantidad, Escudo) :-
+    jugador(Jugador, _),
+    findall(P, (esUnidadDe(Jugador, P), piquero(P, _, Escudo)) ,Piqueros),
+    length(Piqueros, Cantidad).
 
 sobreviveAsedio(Jugador) :-
-    unidades(Jugador, Cola),
-    cantidadPiqueros(Cola, ConEscudo, SinEscudo),
+    jugador(Jugador, _),
+    cantidadPiqueros(Jugador, ConEscudo, escudo),
+    cantidadPiqueros(Jugador, SinEscudo, noEscudo),
     ConEscudo > SinEscudo.
 % Punto 9 %
 
